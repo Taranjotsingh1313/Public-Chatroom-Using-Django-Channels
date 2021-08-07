@@ -36,6 +36,14 @@ class PublicChat(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, code):
         await dele(self.scope['user'])
+        await self.channel_layer.group_send(
+                'publicchat',
+                {
+                    'type':'d.m',
+                    'command':'user',
+                    'no':await cu()
+                }
+            )
         pass
 
     async def chat_message(self,event):
@@ -49,6 +57,12 @@ class PublicChat(AsyncJsonWebsocketConsumer):
             'command':event['command'],
             'no':event['no'],
         })
+    async def d_m(self,event):
+        await self.send_json({
+            'command':event['command'],
+            'no':event['no'],
+        })
+    
 @database_sync_to_async
 def add(user):
     return userh.objects.create(user=user)
